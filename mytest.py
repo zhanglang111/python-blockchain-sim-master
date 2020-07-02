@@ -179,64 +179,10 @@ def replaceMaliciousData():
 if __name__ == '__main__':
     #初始化车辆数据，包括车辆数据的读入，按照时间进行划分为字典，初始化RSU
     initSystem()
-
-    #如果说要进行对比请将以下两条注释去掉
-    # #生成恶意节点随机GPS
     GenerateRandomData()
     replaceMaliciousData()
-    print("恶意节点的id")
     print(MaliciousVehicleID)
-
-    # print(dict)
-
-    #将数据存到里面去
-    # print("列举第一个恶意节点的操作")
-    # print(AllRandData[MaliciousVehicleID[0]])
-    # print("id字典中的第一个恶意节点的内容")
-    # print(dict_VehicleDataByID[MaliciousVehicleID[0]])
-
-    # for i in MaliciousVehicleID:
-    #     #这个是时间
-    #     print(dict[i])
-
-    #将时间戳相同的地方进行覆盖
-    #将时间拿出来
-
-    # for i in MaliciousVehicleID:
-        #直接拿出时间
-    # matrix_temp = np.array(AllRandData[MaliciousVehicleID[0]])
-    # timeList = matrix_temp[:,1]
-    # for j in range(len(timeList)):
-    #     #到底变化谁，那个是按照时间变化的。变化A也不对啊。
-    #     #直接对dict进行变化？j
-    #     #这个时间的第i个车辆
-    #     print(MaliciousVehicleID[0])
-    #     print("修改前")
-    #     print(dict[timeList[j]][MaliciousVehicleID[0]-1])
-    #     #将数据进行修改
-    #     print("修改后")
-    #     print(AllRandData[MaliciousVehicleID[0]][j])
-    #     dict[timeList[j]][MaliciousVehicleID[0] - 1] = AllRandData[MaliciousVehicleID[0]][j]
-
-
-
-    # mytestmaxid = np.array(dict_VehicleDataByID[0])
-    #
-    # print(mytestmaxid)
-    # print(mytestmaxid.shape)
-
-    # myAllRand = np.array(AllRandData)
-    # print(myAllRand)
-    # print(myAllRand.shape)
-
-
-
-
-    #现在进行修改，修改之后将完整数据呈现出来
-
     MaliciousVehicle = 0
-
-
 
     # 前面3秒直接过
     for i in range(125,127):
@@ -246,125 +192,127 @@ if __name__ == '__main__':
         arealist = [[], [], [], []]
 
 
-
-    for i in range(127,181):
-        # print("###########################################################")
-        zone(i)
-        sublistForeTime = AllNears() #四个区域的邻接表
-        arealistBytime[i] = arealist #四个区域的车辆信息存储
-        arealist = [[], [], [], []]
-        zone(i+1)  # 划分车辆的区域
-        sublistNowTime = AllNears()
-        arealistBytime[i+1] = arealist
-        arealist = [[], [], [], []]
-        #四个区域分别对比
-        for j in range(4):
-            #这里不一致可以直接跳过，因为RSU已经做过处理。但如果是同时出现怎么办，实验假设一时刻仅有一辆车辆进行恶意数据的发送。
-            #说明矩阵维度不一样
-            areaStateChange = abs(len(sublistForeTime[j]) - len(sublistNowTime[j]))
-            if areaStateChange>0:
-                matrix_inareaFormTime = []
-                matrix_inareaNowTime = []
-                matrix_inareaFormTime = np.array(arealistBytime[i][j])#i代表第i秒，j代表区域
-                matrix_inareaNowTime = np.array(arealistBytime[i+1][j])
-                formState = matrix_inareaFormTime[:, 0].tolist() #
-                #找出多的或者少的那个索引，因为前后两个矩阵的维度不一样，因为第一列代表的是id
-                nowState = matrix_inareaNowTime[:,0].tolist()
-                minlen = min(len(formState),len(nowState))
-                if len(formState) - len(nowState) > 0:
-                    SmallStateChange = nowState
-                    BiggerStateChange = formState
-                else:
-                    SmallStateChange = formState
-                    BiggerStateChange = nowState
-                # print(SmallStateChange)
-                # print(BiggerStateChange)
-                # print("现在是"+str(i)+"秒")
-                SusVehicle = []
-                while areaStateChange>0:
-                    for k in range(minlen):
-                        if SmallStateChange[k] != BiggerStateChange[k]:
-                            SusVehicle.append(BiggerStateChange[k])
-                            BiggerStateChange.pop(k)
-                            areaStateChange = areaStateChange-1
-                # 这是车辆的id
-                for item in SusVehicle:
-                    testlocationlist = []
-                    locationList = []
-                    if (item > 13):
-                        for t in range(i - 2, i + 1):
-                            testlocationlist.append(dict[t][item-1, :])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
-                            locationList.append(dict[t][item-1, 2:4])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
+    for times in range(2):
+        for i in range(127,181):
+            # print("###########################################################")
+            zone(i)
+            sublistForeTime = AllNears() #四个区域的邻接表
+            arealistBytime[i] = arealist #四个区域的车辆信息存储
+            arealist = [[], [], [], []]
+            zone(i+1)  # 划分车辆的区域
+            sublistNowTime = AllNears()
+            arealistBytime[i+1] = arealist
+            arealist = [[], [], [], []]
+            #四个区域分别对比
+            for j in range(4):
+                #这里不一致可以直接跳过，因为RSU已经做过处理。但如果是同时出现怎么办，实验假设一时刻仅有一辆车辆进行恶意数据的发送。
+                #说明矩阵维度不一样
+                areaStateChange = abs(len(sublistForeTime[j]) - len(sublistNowTime[j]))
+                if areaStateChange>0:
+                    matrix_inareaFormTime = []
+                    matrix_inareaNowTime = []
+                    matrix_inareaFormTime = np.array(arealistBytime[i][j])#i代表第i秒，j代表区域
+                    matrix_inareaNowTime = np.array(arealistBytime[i+1][j])
+                    formState = matrix_inareaFormTime[:, 0].tolist() #
+                    #找出多的或者少的那个索引，因为前后两个矩阵的维度不一样，因为第一列代表的是id
+                    nowState = matrix_inareaNowTime[:,0].tolist()
+                    minlen = min(len(formState),len(nowState))
+                    if len(formState) - len(nowState) > 0:
+                        SmallStateChange = nowState
+                        BiggerStateChange = formState
                     else:
-                        for t in range(i - 2, i + 1):
-                            testlocationlist.append(dict[t][item, :])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
-                            locationList.append(dict[t][item, 2:4])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
-                    # print(locationList)
-                    # print(testlocationlist)
-                    prelocation = predictLocationByHistoryLocation(locationList)
+                        SmallStateChange = formState
+                        BiggerStateChange = nowState
+                    # print(SmallStateChange)
+                    # print(BiggerStateChange)
+                    # print("现在是"+str(i)+"秒")
+                    SusVehicle = []
+                    while areaStateChange>0:
+                        for k in range(minlen):
+                            if SmallStateChange[k] != BiggerStateChange[k]:
+                                SusVehicle.append(BiggerStateChange[k])
+                                BiggerStateChange.pop(k)
+                                areaStateChange = areaStateChange-1
+                                if areaStateChange == 0:
+                                    break
+                    # 这是车辆的id
+                    for item in SusVehicle:
+                        testlocationlist = []
+                        locationList = []
+                        if (item > 13):
+                            for t in range(i - 2, i + 1):
+                                testlocationlist.append(dict[t][item-1, :])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
+                                locationList.append(dict[t][item-1, 2:4])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
+                        else:
+                            for t in range(i - 2, i + 1):
+                                testlocationlist.append(dict[t][item, :])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
+                                locationList.append(dict[t][item, 2:4])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
+                        # print(locationList)
+                        # print(testlocationlist)
+                        prelocation = predictLocationByHistoryLocation(locationList)
 
-                    reportlocation = []
-                    if(item>13):
-                        reportlocation = dict[t + 1][item-1, 2:4]
-                    else:
-                        reportlocation = dict[t + 1][item, 2:4]
-                    # print("上报的位置为")
-                    # print(reportlocation)
-                    isvalid = judgeIsValidLocation(reportlocation, prelocation)
-                if not isvalid:
-                    MaliciousVehicle = MaliciousVehicle + 1
-                    print("发现恶意车辆，车辆信息为#####################################%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$$$$$#########################################&&&&&&&&&%%%%%%%%%%%%%")
-                    print(dict[t + 1][item-1, :])
-                # else:
-                #     print("车辆的位置正常，已被排除为恶意车辆")
-            else:
-                judgeresult = (sublistForeTime[j] == sublistNowTime[j]).all()
-                compareNode = (sublistForeTime[j] == sublistNowTime[j])
-                resultindex = []
-                for k in range(compareNode.shape[0]):
-                    for l in range(k, compareNode.shape[0]):
-                        if not compareNode[k, l]:
-                            resultindex.append([k, l])
-                matrix_resultindex = np.array(resultindex)
-                matrix_sublistForeTime = np.array(sublistForeTime[j])
-                maxtrix_sublistNowTime = np.array(sublistNowTime[j])
-                for l in range(matrix_resultindex.shape[0]):
-                    linkWithSusCountForeTime = 0
-                    linkWithSusCountNowTime = 0
-                    m = matrix_resultindex[l,1]
-                    # print(matrix_sublistForeTime[:,j])
-                    for n in matrix_sublistForeTime[:, m]:
-                        if n == 1:
-                            linkWithSusCountForeTime = linkWithSusCountForeTime + 1
-                    # print("上一秒多少个与该车辆有联系")//这里可能是设计其他的算法在这里面，后面再加吧，区块链的功能还没实现呢。
-                    # print(linkWithSusCountForeTime)
-
-                    for n in maxtrix_sublistNowTime[:, m]:
-                        if n == 1:
-                            linkWithSusCountNowTime = linkWithSusCountNowTime + 1
-                    # print("当前与该车辆有联系")
-                    # print(linkWithSusCountNowTime)
-
-                    #先把车辆的历史位置找出来
-                    locationList = []
-                    testlocationlist = []
-                    for t in range(i-2,i+1):
-                        testlocationlist.append(dict[t][m,:])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
-                        locationList.append(dict[t][m,2:4]) #t代表时间，m代表第几个车辆（邻接矩阵的第几列）
-                    prelocation = predictLocationByHistoryLocation(locationList)
-                    # print("车辆在第")
-                    # print(testlocationlist)
-                    # print(locationList)
-                    # print("预测位置"+str(prelocation))
-                    reportlocation = dict[t+1][m,2:4]
-                    # print("报告位置"+str(reportlocation))
-                    isvalid = judgeIsValidLocation(reportlocation,prelocation)
+                        reportlocation = []
+                        if(item>13):
+                            reportlocation = dict[t + 1][item-1, 2:4]
+                        else:
+                            reportlocation = dict[t + 1][item, 2:4]
+                        # print("上报的位置为")
+                        # print(reportlocation)
+                        isvalid = judgeIsValidLocation(reportlocation, prelocation)
                     if not isvalid:
-                        MaliciousVehicle = MaliciousVehicle+1
+                        MaliciousVehicle = MaliciousVehicle + 1
                         print("发现恶意车辆，车辆信息为#####################################%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$$$$$#########################################&&&&&&&&&%%%%%%%%%%%%%")
-                        print(dict[t+1][m,:])
+                        print(dict[t + 1][item-1, :])
                     # else:
                     #     print("车辆的位置正常，已被排除为恶意车辆")
+                else:
+                    judgeresult = (sublistForeTime[j] == sublistNowTime[j]).all()
+                    compareNode = (sublistForeTime[j] == sublistNowTime[j])
+                    resultindex = []
+                    for k in range(compareNode.shape[0]):
+                        for l in range(k, compareNode.shape[0]):
+                            if not compareNode[k, l]:
+                                resultindex.append([k, l])
+                    matrix_resultindex = np.array(resultindex)
+                    matrix_sublistForeTime = np.array(sublistForeTime[j])
+                    maxtrix_sublistNowTime = np.array(sublistNowTime[j])
+                    for l in range(matrix_resultindex.shape[0]):
+                        linkWithSusCountForeTime = 0
+                        linkWithSusCountNowTime = 0
+                        m = matrix_resultindex[l,1]
+                        # print(matrix_sublistForeTime[:,j])
+                        for n in matrix_sublistForeTime[:, m]:
+                            if n == 1:
+                                linkWithSusCountForeTime = linkWithSusCountForeTime + 1
+                        # print("上一秒多少个与该车辆有联系")//这里可能是设计其他的算法在这里面，后面再加吧，区块链的功能还没实现呢。
+                        # print(linkWithSusCountForeTime)
+
+                        for n in maxtrix_sublistNowTime[:, m]:
+                            if n == 1:
+                                linkWithSusCountNowTime = linkWithSusCountNowTime + 1
+                        # print("当前与该车辆有联系")
+                        # print(linkWithSusCountNowTime)
+
+                        #先把车辆的历史位置找出来
+                        locationList = []
+                        testlocationlist = []
+                        for t in range(i-2,i+1):
+                            testlocationlist.append(dict[t][m,:])  # t代表时间，m代表第几个车辆（邻接矩阵的第几列）
+                            locationList.append(dict[t][m,2:4]) #t代表时间，m代表第几个车辆（邻接矩阵的第几列）
+                        prelocation = predictLocationByHistoryLocation(locationList)
+                        # print("车辆在第")
+                        # print(testlocationlist)
+                        # print(locationList)
+                        # print("预测位置"+str(prelocation))
+                        reportlocation = dict[t+1][m,2:4]
+                        # print("报告位置"+str(reportlocation))
+                        isvalid = judgeIsValidLocation(reportlocation,prelocation)
+                        if not isvalid:
+                            MaliciousVehicle = MaliciousVehicle+1
+                            print("发现恶意车辆，车辆信息为#####################################%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$$$$$#########################################&&&&&&&&&%%%%%%%%%%%%%")
+                            print(dict[t+1][m,:])
+                        # else:
+                        #     print("车辆的位置正常，已被排除为恶意车辆")
 
     print(MaliciousVehicle)
 
