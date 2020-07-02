@@ -138,15 +138,23 @@ class CarInfo:
         self.lon = lon
         self.lat = lat
 
-#怎么去使用这个区块链。
-testBlock = Blockchain()
-print(testBlock)
-testBlock.create_genesis_block()
-print(testBlock)
-#有数据的时候走交易
-##完成了交易
-carInfo = CarInfo(1,133,12,23)
-json_str = json.dumps(carInfo.__dict__)
-print(json_str)
-testBlock.add_new_transaction(json_str)
-testBlock.mine()
+class Arealist(object):
+    def __int__(self,timeStamp,arealist):
+        self.timeStamp = timeStamp
+        self.arealist = arealist
+class Nears_Marix(object):
+    def __int__(self, timeStamp, nears_Marix):
+        self.timeStamp = timeStamp
+        self.nears_Marix = nears_Marix
+# #怎么去使用这个区块链。
+# testBlock = Blockchain()
+# print(testBlock)
+# testBlock.create_genesis_block()
+# print(testBlock)
+# #有数据的时候走交易
+# ##完成了交易
+# carInfo = CarInfo(1,133,12,23)
+# json_str = json.dumps(carInfo.__dict__)
+# print(json_str)
+# testBlock.add_new_transaction(json_str)
+# testBlock.mine()
