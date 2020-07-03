@@ -139,13 +139,15 @@ class CarInfo:
         self.lat = lat
 
 class Arealist:
-    def __init__(self,timeStamp,arealist):
+    def __init__(self,timeStamp,areaIndex,arealist):
         self.timeStamp = timeStamp
+        self.areaIndex = areaIndex
         self.arealist = arealist
 
 class NearsMarix:
-    def __init__(self, timeStamp, nears_Marix):
+    def __init__(self, timeStamp, areaIndex, nears_Marix):
         self.timeStamp = timeStamp
+        self.areaIndex = areaIndex
         self.nears_Marix = nears_Marix
 # #怎么去使用这个区块链。
 # testBlock = Blockchain()

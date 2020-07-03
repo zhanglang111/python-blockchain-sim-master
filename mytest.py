@@ -10,6 +10,9 @@ num = 100  # 个数为10000
 A = np.zeros((24974, 4), dtype=int)
 dict = {} #按照时间划分的车辆字典
 dict_VehicleDataByID = {} #按照车辆ID划分的车辆字典
+
+
+
 arealistBytime={}
 arealist = [[], [], [], []]
 RSU = {}
@@ -148,6 +151,7 @@ def zone(sec):
             arealist[3].append(l)
             continue
 
+
 ##计算邻居
 def AllNears():
     #得出4个矩阵
@@ -239,9 +243,6 @@ if __name__ == '__main__':
 
     #初始化信誉值
 
-
-
-
     initSystem()
     GenerateRandomData()
     replaceMaliciousData()
@@ -251,6 +252,9 @@ if __name__ == '__main__':
 
     # print(publishTimes[42])
     MaliciousVehicle = 0
+
+
+
     #感觉有点运行不走，有点卡
     # 前面3秒直接过
     for i in range(125,127):
@@ -258,17 +262,19 @@ if __name__ == '__main__':
         sublistForeTime = AllNears()  # 四个区域的邻接表
         #由于不知道如何传参，区块链的数据暂时没写。现在对车辆的信誉值进行更新修改
         #将数据上传至区块链
-
-        nears_marix = NearsMarix(i,sublistForeTime)
+        #
+        # nears_marix = NearsMarix(i,sublistForeTime)
+        # # print(nears_marix)
+        # # carInfo = CarInfo(1, 133, 12, 23)
         # print(nears_marix)
-        # carInfo = CarInfo(1, 133, 12, 23)
-        print(nears_marix)
 
 
         # json_str = json.dumps(nears_marix.__dict__)
         # UploadDataToBlockChain(json_str)
 
         arealistBytime[i] = arealist  # 四个区域的车辆位置存储
+
+
         #
         # arealist_marix = Arealist(i,arealistBytime[i])
         # UploadDataToBlockChain(arealist_marix)
