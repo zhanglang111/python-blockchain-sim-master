@@ -1,6 +1,12 @@
 import numpy as np
 from BlockChain import *
-# import os
+import math
+
+#车辆信誉值的参数，正态分布
+mu = 80  # 期望为1
+sigma = 4  # 标准差为3
+num = 100  # 个数为10000
+
 A = np.zeros((24974, 4), dtype=int)
 dict = {} #按照时间划分的车辆字典
 dict_VehicleDataByID = {} #按照车辆ID划分的车辆字典
@@ -8,6 +14,19 @@ arealistBytime={}
 arealist = [[], [], [], []]
 RSU = {}
 validDict = {}
+
+
+VehicleScore={}
+#惩罚次数
+publishTimes = {}
+#恶意节点的惩罚因子
+punishFactor = 1.2
+#激励因子
+incentiveFactors = 1.5
+#基础惩罚分数
+basePunishScore = 10
+
+#想法依然是邻居车辆的举报
 
 #初始化区块链
 testBlock = Blockchain()
@@ -23,6 +42,8 @@ def initSystem():
     Init_RSU(4)  # 设置A个RSU的地址
     dealMatrixSortByID(A)  # 按照车辆ID组成的字典
     dealMatrixSortByTime(A)  # 按时间分配车辆所在的位置
+    initVehicleScore()  #初始化车辆信誉值
+    initPublishTimes()
 
 def GenerateRandomData():
     randRowData = []
@@ -32,9 +53,7 @@ def GenerateRandomData():
         for randTimeItem in randTime:
             randLon = np.random.randint(0, 1500)
             randlat = np.random.randint(0, 1500)
-
             randRowData.append([randNumItem,randTimeItem,randLon,randlat])
-
         AllRandData[randNumItem] = randRowData
 
 
@@ -51,6 +70,18 @@ def dealMatrixSortByID(A):
     # for i in a:
     #     b = A[A[:, 1] == i]
     #     dict[i] = b
+def initVehicleScore():
+    rand_data = np.random.normal(mu, sigma, num)
+    for i in range(100):
+        if i == 13:
+            continue
+        VehicleScore[i] = rand_data[i]
+
+def initPublishTimes():
+    for i in range(100):
+        if i == 13:
+            continue
+        publishTimes[i] = 0
 
 def read_data(filename):
     with open(filename, 'r', encoding='utf-8') as f:
@@ -209,20 +240,31 @@ if __name__ == '__main__':
     #初始化信誉值
 
 
+
+
     initSystem()
     GenerateRandomData()
     replaceMaliciousData()
     print(MaliciousVehicleID)
-    MaliciousVehicle = 0
 
+    # print(publishTimes)
+
+    # print(publishTimes[42])
+    MaliciousVehicle = 0
+    #感觉有点运行不走，有点卡
     # 前面3秒直接过
     for i in range(125,127):
         zone(i)
         sublistForeTime = AllNears()  # 四个区域的邻接表
         #由于不知道如何传参，区块链的数据暂时没写。现在对车辆的信誉值进行更新修改
         #将数据上传至区块链
-        # nears_marix = Nears_Marix(i,sublistForeTime)
-        #
+
+        nears_marix = NearsMarix(i,sublistForeTime)
+        # print(nears_marix)
+        # carInfo = CarInfo(1, 133, 12, 23)
+        print(nears_marix)
+
+
         # json_str = json.dumps(nears_marix.__dict__)
         # UploadDataToBlockChain(json_str)
 
@@ -303,6 +345,14 @@ if __name__ == '__main__':
                     MaliciousVehicle = MaliciousVehicle + 1
                     print("发现恶意车辆，车辆信息为#####################################%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$$$$$#########################################&&&&&&&&&%%%%%%%%%%%%%")
                     print(dict[t + 1][item-1, :])
+                    #对车辆的信誉值进行更新 #这里是信誉值更新机制,还需要记录惩罚了几次
+                    print(publishTimes[item-1])
+                    print(VehicleScore[item-1])
+                    publishTimes[item-1] = publishTimes[item-1]+1
+                    VehicleScore[item-1] = VehicleScore[item-1] -pow(punishFactor,publishTimes[item-1])*basePunishScore
+                    # if VehicleScore[item-1]< 60:
+                    #     #上传到区块链
+
                 # else:
                 #     print("车辆的位置正常，已被排除为恶意车辆")
             else:
@@ -318,18 +368,27 @@ if __name__ == '__main__':
                 maxtrix_sublistNowTime = np.array(sublistNowTime[j])
                 for l in range(matrix_resultindex.shape[0]):
                     linkWithSusCountForeTime = 0
-                    linkWithSusCountNowTime = 0
+                    ##当成是集体上报的，只要任意车辆上传虚假GPS消息，则周围的邻居车辆信誉值增加
+                    # linkWithSusCountNowTime = 0
                     m = matrix_resultindex[l,1]
+                    nearlistofSusVehicle = []
                     # print(matrix_sublistForeTime[:,j])
-                    for n in matrix_sublistForeTime[:, m]:
-                        if n == 1:
-                            linkWithSusCountForeTime = linkWithSusCountForeTime + 1
-                    # print("上一秒多少个与该车辆有联系")//这里可能是设计其他的算法在这里面，后面再加吧，区块链的功能还没实现呢。
-                    # print(linkWithSusCountForeTime)
+                    for n in range(matrix_sublistForeTime[:, m].shape[0]):
+                        if matrix_sublistForeTime[n,m] == 1:
+                            print(arealistBytime[i][j])
+                            #这里需要查看是否正确，将恶意车辆周围的邻居存储
+                            nearlistofSusVehicle.append(arealistBytime[i][j][n][0])
+                        # if n == 1:
+                        #
+                        #     linkWithSusCountForeTime = linkWithSusCountForeTime + 1
+                    #记录上一次与该车辆有直接通信关系的车辆，保存在list中
+                    print("上一秒哪些车与该车辆有联系")
+                    #将这个记录，然后如果车辆有判断为恶意车辆，则将其信誉值进行增加
+                    print(nearlistofSusVehicle)
 
-                    for n in maxtrix_sublistNowTime[:, m]:
-                        if n == 1:
-                            linkWithSusCountNowTime = linkWithSusCountNowTime + 1
+                    # for n in maxtrix_sublistNowTime[:, m]:
+                    #     if n == 1:
+                    #         linkWithSusCountNowTime = linkWithSusCountNowTime + 1
                     # print("当前与该车辆有联系")
                     # print(linkWithSusCountNowTime)
 
@@ -350,7 +409,12 @@ if __name__ == '__main__':
                     if not isvalid:
                         MaliciousVehicle = MaliciousVehicle+1
                         print("发现恶意车辆，车辆信息为#####################################%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$$$$$#########################################&&&&&&&&&%%%%%%%%%%%%%")
+                        #这里可能是m-1
                         print(dict[t+1][m,:])
+                        #对刚才举报的车辆进行信誉值递增,有log函数的参与
+                        for nearofMvalVehicle in nearlistofSusVehicle:
+                            VehicleScore[nearofMvalVehicle] = VehicleScore[nearofMvalVehicle] + incentiveFactors*math.log(1+((VehicleScore[nearofMvalVehicle]-60)/60)*(100-VehicleScore[nearofMvalVehicle]))
+
                     # else:
                     #     print("车辆的位置正常，已被排除为恶意车辆")
 
